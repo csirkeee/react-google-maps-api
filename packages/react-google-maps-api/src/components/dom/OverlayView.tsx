@@ -12,6 +12,7 @@ import ContentMountHandler from './CountMountHandler'
 interface OverlayViewState {
   overlayView: google.maps.OverlayView | null
   containerStyle: React.CSSProperties
+  inited: boolean
 }
 
 export interface OverlayViewProps {
@@ -36,6 +37,7 @@ export class OverlayView extends React.PureComponent<OverlayViewProps, OverlayVi
   state: OverlayViewState = {
     overlayView: null,
     containerStyle: {},
+    inited: false,
   }
 
   mapPaneEl: Element | null = null
@@ -128,6 +130,13 @@ export class OverlayView extends React.PureComponent<OverlayViewProps, OverlayVi
   }
 
   componentDidUpdate(prevProps: OverlayViewProps): void {
+    if (!this.state.inited && this.state.overlayView !== null && this.containerRef.current) {
+      this.onPositionElement()
+      this.setState({
+        inited: true,
+      })
+    }
+
     if (prevProps.position !== this.props.position || prevProps.bounds !== this.props.bounds) {
       setTimeout(() => {
         this.state.overlayView !== null && this.state.overlayView.draw()
@@ -153,7 +162,7 @@ export class OverlayView extends React.PureComponent<OverlayViewProps, OverlayVi
             {React.Children.only(this.props.children)}
           </ContentMountHandler>
         </div>,
-        this.mapPaneEl,
+        this.mapPaneEl
       )
     ) : (
       <></>
